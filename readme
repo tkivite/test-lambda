@@ -1,0 +1,136 @@
+Express.js has become a go-to HTTP framework for quickly building RESTful web services in Node.js. If you are a Node.js developer or you've built an API in Node.js, it is highly likely that you used Express.js. Express apps are easier-to-build and maintain. For a simple Express.js app, you just need a few lines of code to add routes and route handlers. That's it.
+
+Create Express App
+Before creating Express app, make sure that you've already installed Node.js. Create a new directory to hold your application files:
+
+$ mkdir express-app
+$ cd express-app 
+Run the following command to create a new Node.js project:
+
+$ npm init
+This command asks you to enter your application name, version, main file and more. Just hit RETURN button to accept the defaults for most of the things except the following:
+
+$ entry point: (index.js)
+Enter app.js for application main file name (or whatever you want to call the main file). If you want to keep the name index.js, simply hit RETURN button to accept the suggested file name. When you okay the Node.js project creation, it creates a package.json file for your application.
+
+Now install the Express module from NPM by running the following command:
+
+$ npm install express --save
+Create a app.js file in your application root directory (express-app in our case) and paste the following code into it:
+
+app.js
+
+const express = require('express')
+const app = express()
+
+app.get('/', (req, res) => res.send('Hello world!'))
+
+const port = process.env.PORT || 3000
+
+app.listen(port, () => 
+  console.log(`App is listening on port ${port}.`)
+)
+This app starts a server and listens on port 3000 for connections. The app responds with "Hello World!" for requests to the root URL (/) or route. For every other path, it will respond with a "404 Not Found".
+
+To run this application locally, execute the following command on terminal to view "App is listening on port 3000." as a response.
+
+$ node app.js
+That is it! Our simplest Express.js app is completed. Open http://localhost:3000 in your favorite browser, and you will see a "Hello world!" message.
+
+Application deployment
+Now comes the harder part: the application deployment on AWS Lambda to show it to your friends and family. Luckily, Claudia.js makes it super simple to deploy Node.js apps on AWS Lambda and API Gateway. It automates all the error-prone deployment and configuration tasks, and sets everything up the way JavaScript developers expect out of the box. This means that you can get started with Lambda and API Gateway easily, and focus on solving important business problems instead of dealing with AWS deployment workflows.
+
+Make sure you configured your AWS access credentials correctly as explained in this tutorial before running Claudia commands.
+
+In order to use Claudia.js to deploy on AWS Lambda, you need slightly to modify the code in app.js. Instead of staring the server using app.listen, you should export your app. After these modification, your app.js file should look like the following:
+
+app.js
+
+const express = require('express')
+const app = express()
+
+app.get('/', (req, res) => res.send('Hello world!'))
+
+module.exports = app;
+Wouldn't it break the local Express server? Yes. But you can fix it by creating another file called app.local.js with the following content:
+
+app.local.js
+
+const app = require('./app')
+const port = process.env.PORT || 3000
+
+app.listen(port, () => 
+  console.log(`App is listening on port ${port}.`)
+)
+And then execute the following command to start the local server:
+
+$ node app.local.js
+Now let's install the Claudia.js on your computer. Claudia is available on NPM which can be installed with the following command:
+
+$ npm install -g claudia
+It will install Claudia as a global utility to make it available to all your projects. To verify that Claudia was installed correctly, run the following command:
+
+$ claudia --version
+You need to generate AWS Lambda wrapper for your Express app to make that your app work correctly on AWS Lambda. Using Claudia, you can do so by running the following command:
+
+$  generate-serverless-express-proxy --express-module app
+Where app is the name of your Express application main file without .js extension.
+
+Above command will generate a lambda.js file in your app root directory with the following content:
+
+lambda.js
+
+'use strict'
+const awsServerlessExpress = require('aws-serverless-express')
+const app = require('./app')
+const binaryMimeTypes = [
+	'application/octet-stream',
+	'font/eot',
+	'font/opentype',
+	'font/otf',
+	'image/jpeg',
+	'image/png',
+	'image/svg+xml'
+]
+const server = awsServerlessExpress.createServer(app, null, binaryMimeTypes);
+exports.handler = (event, context) => awsServerlessExpress.proxy(server, event, context)
+)
+That's it. Now you just need to deploy your Express app (with lambda.js file) to AWS Lambda and API Gateway using the the command:
+
+$ claudia create --handler lambda.handler --deploy-proxy-api --region us-east-1
+Where us-east-1 is the name of one of the AWS regions where you want to deploy your application. Make sure that you enter the correct value.
+
+If everything goes well, the above command will finish after a few moments and will print the following response:
+
+{
+  "lambda": {
+    "role": "express-app-executor",
+    "name": "express-app",
+    "region": "us-east-1"
+  },
+  "api": {
+    "id": "2yfnh84gcj",
+    "url": "https://2yfnh84gcj.execute-api.us-east-1.amazonaws.com/latest"
+  }
+}
+Where api.url is the link of your RESTful API deployed on AWS Lambda. If you open this link in your browser, you will see "Hello world!" response.
+
+After the deployment is completed, Claudia will save a new file claudia.json in your project directory, with the following details, so you can later invoke and update the app easily.
+
+claudia.js
+
+{
+  "lambda": {
+    "role": "express-app-executor",
+    "name": "express-app",
+    "region": "us-east-1"
+  },
+  "api": {
+    "id": "2yfnh84gcj",
+  }
+}
+In future, if you want to change your app code (i.e. add more routes), you can deploy those changes to AWS Lambda with the following command:
+
+$ claudia update
+Conclusion
+Claudia is a powerful tool for building serverless app with AWS Lambda and Express.js. It has a lot of options to customise the deployment. Check out Claudia's docs for more information on the various options you can use when deploying your app.

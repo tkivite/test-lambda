@@ -73,7 +73,7 @@ It will install Claudia as a global utility to make it available to all your pro
 $ claudia --version
 You need to generate AWS Lambda wrapper for your Express app to make that your app work correctly on AWS Lambda. Using Claudia, you can do so by running the following command:
 
-$  generate-serverless-express-proxy --express-module app
+$  claudia generate-serverless-express-proxy --express-module app
 Where app is the name of your Express application main file without .js extension.
 
 Above command will generate a lambda.js file in your app root directory with the following content:

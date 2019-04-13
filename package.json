@@ -1,0 +1,30 @@
+{
+  "name": "express-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tkivite/test-lambda.git"
+  },
+  "keywords": [
+    "test",
+    "lambda",
+    "serveless",
+    "express",
+    "mysql"
+  ],
+  "author": "titus kivite",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tkivite/test-lambda/issues"
+  },
+  "homepage": "https://github.com/tkivite/test-lambda#readme",
+  "dependencies": {
+    "aws-serverless-express": "^3.3.6",
+    "express": "^4.16.4"
+  }
+}

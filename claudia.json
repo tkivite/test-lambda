@@ -1,0 +1,10 @@
+{
+  "lambda": {
+    "role": "express-app-executor",
+    "name": "express-app",
+    "region": "us-east-2"
+  },
+  "api": {
+    "id": "x36bh8kz0i"
+  }
+}
